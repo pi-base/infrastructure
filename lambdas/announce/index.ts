@@ -2,11 +2,12 @@ import * as https from 'https'
 
 const token = process.env.SLACK_TOKEN
 
+const errorChannel = process.env.INFO_CHANNEL || 'errors'
 const infoChannel = process.env.INFO_CHANNEL || 'activity'
 const debugChannel = process.env.DEBUG_CHANNEL || 'bots'
 
 type Event = {
-  level?: string
+  level?: 'error' | 'info' | 'debug'
   message?: string
 }
 
@@ -20,6 +21,8 @@ exports.handler = async (event: Event) => {
 
 function findChannel(level: string | undefined) {
   switch (level) {
+    case 'error':
+      return errorChannel
     case 'info':
       return infoChannel
     default:

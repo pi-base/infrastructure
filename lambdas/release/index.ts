@@ -22,7 +22,7 @@ exports.handler = async (event: Event, context: Context) => {
   try {
     return await handle(event, context)
   } catch (error) {
-    await info("Error handling event\n```" + JSON.stringify({ error, event }, null, 2) + "```")
+    await report('error', "Error handling event\n```" + JSON.stringify({ error, event }, null, 2) + "```")
     throw error
   }
 }
@@ -82,7 +82,7 @@ function debug(message: string) {
   return report('debug', message)
 }
 
-function report(level: string, message: unknown) {
+function report(level: 'error' | 'info' | 'debug', message: unknown) {
   return promisify(lambda, 'invoke')({
     FunctionName: 'announce',
     InvocationType: 'RequestResponse',
