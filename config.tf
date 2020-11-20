@@ -64,28 +64,6 @@ module "distribution_prod" {
 ///////////// Trigger release on uploads to S3 buckets /////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-data "aws_iam_policy_document" "release_lambda_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-  statement {
-    actions   = ["lambda:InvokeFunction"]
-    resources = [aws_lambda_function.announce.arn]
-  }
-  statement {
-    actions = ["cloudfront:CreateInvalidation"]
-    resources = [
-      module.distribution_dev.distribution.arn,
-      module.distribution_prod.distribution.arn
-    ]
-  }
-}
-
 resource "aws_iam_role" "release-lambda" {
   name               = "release-lambda"
   assume_role_policy = local.lambda_role_policy
@@ -105,6 +83,30 @@ resource "aws_lambda_permission" "allow_bucket_prod" {
   function_name = aws_lambda_function.release.arn
   principal     = "s3.amazonaws.com"
   source_arn    = module.distribution_prod.bucket.arn
+}
+
+resource "aws_iam_policy" "allow_invalidate" {
+  name        = "allow-invalidate"
+  description = "Allow invalidating the cloudfront distributions"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Action" : ["cloudfront:CreateInvalidation"],
+        "Effect" : "Allow",
+        "Resource" : [
+          module.distribution_dev.distribution.arn,
+          module.distribution_prod.distribution.arn
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "allow_release_invalidate" {
+  role       = aws_iam_role.release-lambda.name
+  policy_arn = aws_iam_policy.allow_invalidate.arn
 }
 
 resource "aws_lambda_function" "release" {
