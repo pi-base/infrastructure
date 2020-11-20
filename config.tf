@@ -77,6 +77,13 @@ data "aws_iam_policy_document" "release_lambda_policy" {
     actions   = ["lambda:InvokeFunction"]
     resources = [aws_lambda_function.announce.arn]
   }
+  statement {
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = [
+      module.distribution_dev.distribution.arn,
+      module.distribution_prod.distribution.arn
+    ]
+  }
 }
 
 resource "aws_iam_role" "release-lambda" {
