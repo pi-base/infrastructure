@@ -1,0 +1,5 @@
+.terraform
+secret.tfvars
+
+lambdas/**/dst
+node_modules

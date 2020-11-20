@@ -1,0 +1,17 @@
+{
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules/*",
+    "**.spec.ts"
+  ],
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2017",
+    "noImplicitAny": true,
+    "preserveConstEnums": true,
+    "strict": true,
+    "outDir": "dst"
+  }
+}
